@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Главная страница</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .section { margin-bottom: 20px; }
+        .last-orders { border: 1px solid #ddd; padding: 10px; }
+        .last-orders h2 { margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Добро пожаловать в систему управления рестораном</h1>
+    <div class="section">
+        <h2>Последние заказы (в ожидании):</h2>
+        <div class="last-orders">
+            {% if last_orders %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Номер стола</th>
+                            <th>Общая стоимость</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in last_orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.table_number }}</td>
+                                <td>{{ order.total_price }} руб.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Нет текущих заказов.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="section">
+        <h2>Общая выручка:</h2>
+        <p>{{ total_revenue }} руб.</p>
+    </div>
+</body>
+</html>

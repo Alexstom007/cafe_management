@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Заказы</title>
+     <style>
+        body { font-family: sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .search-container { margin-bottom: 10px; }
+        .search-container input, .search-container select, .search-container button { padding: 8px; margin-right: 5px; }
+        .errorlist { color: red; margin-bottom: 10px; }
+        .action-links a { margin-right: 5px; }
+         .action-links {white-space: nowrap;}
+    </style>
+</head>
+<body>
+    <h1>Заказы</h1>
+    <div class="search-container">
+        <form method="get">
+            <input type="text" name="search" placeholder="Поиск:" value="{{ search_query }}">
+            <select name="search_type">
+                <option value="table_number" {% if search_type == 'table_number' %}selected{% endif %}>По номеру стола</option>
+                <option value="status" {% if search_type == 'status' %}selected{% endif %}>По статусу</option>
+            </select>
+            <button type="submit">Искать</button>
+            <a href="{% url 'orders:order_list' %}">Очистить поиск</a>
+        </form>
+    </div>
+    {% if error %}
+        <ul class="errorlist">
+               <li>{{ error }}</li>
+        </ul>
+    {% endif %}
+    <a href="{% url 'orders:order_create' %}">Создать новый заказ</a>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Номер стола</th>
+                <th>Блюда</th>
+                <th>Общая стоимость</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.table_number }}</td>
+                    <td>
+                         {% for item in order.orderitem_set.all %}
+                             {{ item.menu_item.name }}: {{ item.menu_item.price }} x{{item.quantity }} <br>
+                          {% endfor %}
+                    </td>
+                    <td>{{ order.total_price }} руб.</td>
+                    <td>{{ order.get_status_display }}</td>
+                     <td class="action-links">
+                        <a href="{% url 'orders:order_detail' order.id %}">Просмотреть</a> |
+                       <a href="{% url 'orders:order_update' order.id %}">Редактировать</a> |
+                        <form method="post" action="{% url 'orders:order_delete' order.id %}" style="display: inline;">
+                             {% csrf_token %}
+                                 <button type="submit" style="background: none; border: none; color: blue; cursor: pointer; padding: 0;">Удалить</button>
+                         </form>
+                     </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Нет заказов</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'orders:revenue' %}">Посмотреть выручку</a>
+</body>
+</html>

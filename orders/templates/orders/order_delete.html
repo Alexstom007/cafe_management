@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Удалить заказ</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .confirm-delete { border: 1px solid #ddd; padding: 20px; width: 50%; }
+        h2 { margin-bottom: 15px; }
+         button { padding: 10px 20px; background-color: #dc3545; color: white; border: none; cursor: pointer; }
+       button:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <div class="confirm-delete">
+         <h2>Вы уверены, что хотите удалить заказ #{{ order.id }}?</h2>
+         <p>Вы уверены, что хотите удалить заказ {{ order.id }}?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Удалить заказ</button>
+             <a href="{% url 'orders:order_list' %}">Отмена</a>
+        </form>
+    </div>
+</body>
+</html>

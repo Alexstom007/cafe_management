@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Выручка</title>
+      <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .revenue-container { border: 1px solid #ddd; padding: 20px; width: 30%; margin: auto; }
+        h2 { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+   <div class="revenue-container">
+        <h2>Общая выручка</h2>
+        <p><strong>Общая:</strong> {{ revenue }} руб.</p>
+       <a href="{% url 'orders:order_list' %}">Назад к заказам</a>
+   </div>
+</body>
+</html>

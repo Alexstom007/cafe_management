@@ -1,0 +1,100 @@
+# Django проект управления кафе
+
+Это приложение для управления заказами в кафе, написанное на Django. Оно позволяет создавать заказы и управлять меню.
+
+## Структура, возможности и эндпойнты проекта
+
+- **/create/**: Эндпойнт для создания нового заказа.
+- **/orders/**: Эндпойнт для получения списка всех заказов.
+
+## Загрузка последних изменений в ветке
+
+Находясь в текущем репозитории:
+```bash
+git checkout develop
+git pull origin develop
+```
+
+## Локальный запуск проекта с БД SQLite
+
+Создайте и активируйте виртуальное окружение, установите зависимости:
+
+__Для Windows:__
+```bash
+python -m venv venv
+venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+__Для Linux:__
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Выполните миграции и запустите локальный сервер:
+```bash
+python manage.py migrate
+python manage.py runserver
+```
+
+## Создание суперпользователя
+
+Для доступа к административной панели создайте суперпользователя:
+```bash
+python manage.py createsuperuser
+```
+Следуйте инструкциям на экране, чтобы ввести имя пользователя, адрес электронной почты и пароль.
+
+## Добавление ингредиентов
+
+Чтобы добавить ингредиенты в систему, вы можете использовать административную панель или создать их через Django Shell.
+
+### Пример добавления ингредиентов через Django Shell
+
+1. Запустите Django Shell:
+   ```bash
+   python manage.py shell
+   ```
+
+2. Импортируйте необходимые модели и создайте ингредиенты:
+   ```python
+   from cafe_management.orders.models import MenuItem
+
+   # Пример добавления ингредиента
+   item = MenuItem(name='Кофе', price=100)
+   item.save()
+   ```
+
+## Примеры использования
+
+### Создание заказа через API
+
+Вы можете создать новый заказ, отправив POST-запрос на `/create/` с JSON-данными:
+
+```json
+{
+    "table_number": "5",
+    "items": [
+        {
+            "menu_item": 1,
+            "quantity": 2
+        },
+        {
+            "menu_item": 2,
+            "quantity": 1
+        }
+    ]
+}
+```
+
+### Получение списка заказов
+
+Вы можете получить список всех заказов, отправив GET-запрос на `/orders/`.
+
+#### Автор
+
+Александр Вотинов- [https://github.com/Alexstom007](https://github.com/Alexstom007)

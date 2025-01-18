@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать заказ</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        form { width: 50%; margin: auto; padding: 20px; border: 1px solid #ddd; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="number"],
+        textarea,
+        select { width: calc(100% - 10px); padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .errorlist { color: red; margin-bottom: 10px; }
+        .item-form { display: flex; align-items: center; margin-bottom: 10px; }
+        .item-form label { margin-right: 10px; }
+        .item-form select, .item-form input { flex-grow: 1; padding: 8px; border: 1px solid #ddd; }
+        .add-item-button { padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        .add-item-button:hover { background-color: #218838; }
+        .delete-item-button { padding: 5px 10px; background-color: #dc3545; color: white; border: none; cursor: pointer; margin-left: 5px;}
+        .delete-item-button:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <h1>Редактировать заказ #{{ order.id }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+            <ul class="errorlist">
+              {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+               {% endfor %}
+           </ul>
+         {% endif %}
+        <label for="id_table_number">Номер стола:</label>
+        {{ form.table_number }}
+        <label for="id_status">Статус:</label>
+       {{ form.status }}
+        <div id="item-form-container">
+             {{ order_items_form.management_form }}
+            {% for form in order_items_form %}
+                <div class="item-form" {% if not form.instance.pk %}style="display: flex;"{% endif %}>
+                 {{form.id}}
+                  <label for="{{form.menu_item.id_for_label}}">Блюдо:</label>
+                  {{form.menu_item}}
+                  <label for="{{form.quantity.id_for_label}}">Количество:</label>
+                  {{form.quantity}}
+                  {% if form.instance.pk %}
+                    {{ form.DELETE }}
+                  {% endif %}
+              </div>
+            {% endfor %}
+        </div>
+           <button type="button" id="add-item">Добавить блюдо</button>
+        <button type="submit">Сохранить изменения</button>
+        <a href="{% url 'orders:order_list' %}">Отмена</a>
+         <a href="{% url 'orders:order_list' %}">Назад к заказам</a>
+    </form>
+     <script>
+        document.getElementById('add-item').addEventListener('click', function() {
+              let container = document.getElementById('item-form-container');
+              let formCount = container.querySelectorAll('.item-form').length;
+              let template = document.querySelector('.item-form').cloneNode(true);
+              template.querySelectorAll('input, select').forEach(el => {
+                  let id = el.id.replace(/-[0-9]+$/, `-${formCount}`);
+                  let name = el.name.replace(/-[0-9]+$/, `-${formCount}`);
+                  el.id = id;
+                  el.name = name;
+                   el.value = '';
+              });
+               template.style.display = "flex";
+               let hiddenDeleteInput = template.querySelector('input[id*="DELETE"]');
+               if(hiddenDeleteInput){
+                 hiddenDeleteInput.value = ''
+               }
+               container.appendChild(template);
+        });
+</script>
+</body>
+</html>
