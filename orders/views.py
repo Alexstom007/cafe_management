@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.db.models import Sum
 from django.forms import formset_factory
+from django.db import IntegrityError
 
 from .models import Order, MenuItem, OrderItem
 from .forms import OrderCreateForm, OrderItemForm, OrderUpdateForm
@@ -54,18 +55,26 @@ def order_create(request):
         try:
             data = json.loads(request.body)
             table_number = data.get('table_number')
+            if table_number is None:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Номер стола обязателен к заполнению'
+                }, status=400)
             items_data = data.get('items', [])
-
-            # Проверка на занятость стола
+            if not items_data:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Заказ не может быть создан без блюда'
+                    }, status=400)
             existing_order = Order.objects.filter(
                 table_number=table_number,
                 status__in=['pending', 'ready']
             ).first()
-
             if existing_order:
                 return JsonResponse({
                     'status': 'error',
-                    'message': f'Стол {table_number} занят. Существующий заказ ID: {existing_order.id}.'
+                    'message': f'Стол {table_number} занят.'
+                               f'Существующий заказ ID: {existing_order.id}.'
                 }, status=400)
             form = OrderCreateForm({'table_number': table_number})
             if not form.is_valid():
@@ -78,10 +87,16 @@ def order_create(request):
                 menu_item_id = item_data.get('menu_item')
                 quantity = item_data.get('quantity')
                 if menu_item_id and quantity:
-                    OrderItem.objects.create(
-                        order=order,
-                        menu_item_id=menu_item_id,
-                        quantity=quantity)
+                    try:
+                        OrderItem.objects.create(
+                            order=order,
+                            menu_item_id=menu_item_id,
+                            quantity=quantity)
+                    except IntegrityError:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Блюдо с ID {menu_item_id} не найдено'
+                             }, status=400)
             order.total_price = calculate_total_price(order)
             order.save()
             return JsonResponse({

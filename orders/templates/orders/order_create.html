@@ -16,7 +16,7 @@
         .item-form select, .item-form input { flex-grow: 1; padding: 8px; border: 1px solid #ddd; }
         .add-item-button { padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; }
         .add-item-button:hover { background-color: #218838; }
-        .delete-item-button { padding: 5px 10px; background-color: #dc3545; color: white; border: none; cursor: pointer; margin-left: 5px; }
+         .delete-item-button { padding: 5px 10px; background-color: #dc3545; color: white; border: none; cursor: pointer; margin-left: 5px;}
         .delete-item-button:hover { background-color: #c82333; }
     </style>
 </head>
@@ -33,48 +33,50 @@
                 {% endfor %}
             </ul>
         {% endif %}
-
         <label for="id_table_number">Номер стола:</label>
         {{ form.table_number }}
 
         <div id="item-form-container">
-            <div class="item-form" style="display: flex;">
-                <label>Блюдо:</label>
-                <select class="menu-item" name="menu_item">
-                    {% for item in menu_items %}
-                    <option value="{{ item.id }}">{{ item.name }} - {{ item.price }} руб.</option>
-                     {% endfor %}
-               </select>
-                 <label>Количество:</label>
-                 <input type="number" class="quantity" value="1" min="1">
-            </div>
         </div>
          <button type="button" id="add-item">Добавить блюдо</button>
          <button type="button" id="create-order">Создать заказ</button>
          <a href="{% url 'orders:order_list' %}">Отмена</a>
     </form>
     <script>
-        document.getElementById('add-item').addEventListener('click', function() {
-            let container = document.getElementById('item-form-container');
-            let template = container.querySelector('.item-form').cloneNode(true);
+         document.getElementById('add-item').addEventListener('click', function() {
+              let container = document.getElementById('item-form-container');
+              let template = document.createElement('div');
+              template.classList.add('item-form');
+                template.style.display = "flex";
+              template.innerHTML = `
+                <label>Блюдо:</label>
+                <select class="menu-item" name="menu_item">
+                    {% for item in menu_items %}
+                    <option value="{{ item.id }}">{{ item.name }} - {{ item.price }} руб.</option>
+                     {% endfor %}
+               </select>
+                <label>Количество:</label>
+                <input type="number" class="quantity" value="1" min="1">
+                <button type="button" class="delete-item-button">Удалить</button>
+               `;
+               template.querySelector('.delete-item-button').addEventListener('click', function(){
+                  template.remove();
+                 });
              container.appendChild(template);
         });
-
       document.getElementById('create-order').addEventListener('click', function() {
             let items = [];
             let table_number = document.querySelector('#id_table_number').value;
             let itemForms = document.querySelectorAll('#item-form-container .item-form');
-           
-             itemForms.forEach(form => {
-               let menu_item_select = form.querySelector('.menu-item')
-               let menu_item_id =  menu_item_select.value;
-               let quantity = form.querySelector('.quantity').value;
+            itemForms.forEach(form => {
+                 let menu_item_select = form.querySelector('.menu-item')
+                  let menu_item_id =  menu_item_select.value;
+                  let quantity = form.querySelector('.quantity').value;
                 items.push({
                     menu_item: menu_item_id,
                     quantity: quantity
                  });
              });
-
              fetch("{% url 'orders:order_create' %}", {
                   method: 'POST',
                    headers: {
@@ -101,7 +103,6 @@
                  .catch(error => {
                   console.error('Error:', error);
                  });
-
         });
     </script>
 </body>
